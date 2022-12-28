@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>D3Learn</title>
+</head>
+
+<body>
+    <svg width="1400" , height="600" id="mainsvg" class="svgs"></svg>
+    <script>
+        const data = [{ name: 'a', value: 1 },
+        { name: 'b', value: 2 },
+        { name: 'c', value: 3 },
+        { name: 'd', value: 4 },
+        { name: 'e', value: 5 },
+        { name: 'f', value: 6 },
+        { name: 'g', value: 7 },
+        { name: 'h', value: 8 }];
+
+        const svg = d3.select('.svgs');
+        const width = +svg.attr('width'); // 快速将字符串变为数字
+        const height = +svg.attr('height');
+        const margin = { top: 60, right: 30, bottom: 60, left: 50 };
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+
+        // 连续型
+        const xScale = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.value)])
+            .range([0, innerWidth]);
+
+        // 离散型
+        const yScale = d3.scaleBand()
+            .domain(data.map(d => d.name))
+            .range([0, innerHeight])
+            .padding(0.2); // 0到1
+
+        const g = svg.append('g').attr('id', 'maingroup')
+            .attr('transform', `translate(${margin.left}, ${margin.top})`)
+
+        // 坐标轴定义
+        const yAxis = d3.axisLeft(yScale)
+            .tickSize(-innerWidth); // 刻度
+        g.append('g').call(yAxis);
+
+        // 注意！！！！！
+        const xAxis = d3.axisBottom(xScale)
+            .tickSize(-innerHeight);
+        g.append('g').call(xAxis).attr('transform', `translate(0, ${innerHeight})`);
+
+        // 对于每条数据添加一个图元
+        data.forEach(d => {
+            g.append('rect')
+                .attr('width', xScale(d.value))
+                .attr('height', yScale.bandwidth()) // 每一个条带有多宽
+                .attr('fill', 'green')
+                .attr('opacity', 0.5) // 淡化
+                .attr('y', yScale(d.name))
+        });
+
+        d3.selectAll('.tick text').attr('font-size', '2em') // 坐标轴刻度标签
+
+        g.append('text').text('My first chart')
+            .attr('font-size', '3em')
+            .attr('transform', `translate(${innerWidth / 2}, 0)`)
+            .attr('text-anchor', 'middle')
+    </script>
+</body>
+
+</html>
