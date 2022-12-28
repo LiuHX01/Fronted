@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
     <title>D3Learn</title>
 </head>
 
 <body>
-    <svg width="1400" , height="600" id="mainsvg" class="svgs"></svg>
+    <svg width="1400" , height="600" id="mainsvg" class="svgs" style="background-color: grey"></svg>
     <script>
         const data = [{ name: 'a', value: 1 },
         { name: 'b', value: 2 },
@@ -20,6 +20,16 @@
         { name: 'f', value: 6 },
         { name: 'g', value: 7 },
         { name: 'h', value: 8 }];
+
+        const data12 = [{ name: 'b', value: 8 },
+        { name: 'a', value: 7 },
+        { name: 'c', value: 6 },
+        { name: 'd', value: 5 },
+        { name: 'e', value: 4 },
+        { name: 'f', value: 3 },
+        { name: 'g', value: 2 },
+        { name: 'h', value: 1 }];
+        // console.log(data12)
 
         const svg = d3.select('.svgs');
         const width = +svg.attr('width'); // 快速将字符串变为数字
@@ -39,8 +49,21 @@
             .range([0, innerHeight])
             .padding(0.2); // 0到1
 
+
+
+
         const g = svg.append('g').attr('id', 'maingroup')
             .attr('transform', `translate(${margin.left}, ${margin.top})`)
+
+
+        g.selectAll('.dataRect').data(data).enter().append('rect')
+            .attr('class', 'dataRect')
+            .attr('width', d => xScale(d.value))
+            .attr('height', yScale.bandwidth())
+            .attr('y', d => yScale(d.name))
+            .attr('fill', 'yellow')
+            .attr('opacity', 0.5)
+
 
         // 坐标轴定义
         const yAxis = d3.axisLeft(yScale)
@@ -53,14 +76,17 @@
         g.append('g').call(xAxis).attr('transform', `translate(0, ${innerHeight})`);
 
         // 对于每条数据添加一个图元
-        data.forEach(d => {
-            g.append('rect')
-                .attr('width', xScale(d.value))
-                .attr('height', yScale.bandwidth()) // 每一个条带有多宽
-                .attr('fill', 'green')
-                .attr('opacity', 0.5) // 淡化
-                .attr('y', yScale(d.name))
-        });
+        // data.forEach(d => {
+        //     g.append('rect')
+        //         .attr('width', xScale(d.value))
+        //         .attr('height', yScale.bandwidth()) // 每一个条带有多宽
+        //         .attr('fill', 'green')
+        //         .attr('opacity', 0.5) // 淡化
+        //         .attr('y', yScale(d.name))
+        // });
+
+        // d3.selectAll('rect').data(data2).attr('width', d => xScale(d.value))
+        // 动画 .transition.duration(1000)
 
         d3.selectAll('.tick text').attr('font-size', '2em') // 坐标轴刻度标签
 
