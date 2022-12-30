@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+    <script src="./MovingMarker.js"></script>
+    <title>Map Demo</title>
+    <style type="text/css">
+        html {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #map {
+            height: 90%;
+            width: 100%;
+        }
+
+        button {
+            height: 10%;
+            width: 49%;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <button type="button" onclick="move()">开始移动（点击设置路线点）</button>
+    <button type="button" onclick="clearAll()">清除所有标记点和路径</button>
+    <script>
+        const aduration = 500;
+        let trace = [];
+        let markerList = [];
+        let polylineList = [];
+
+
+        const map = L.map('map').setView([38.997899, 117.314542], 16);
+        L.tileLayer('http://rt0.map.gtimg.com/realtimerender?z={z}&x={x}&y={-y}&type=vector&style=0')
+            .addTo(map);
+
+        const scale = L.control.scale({ maxWidth: 200, metric: true, imperial: false })
+            .addTo(map);
+
+        // 点击添加点
+        map.on('click', function (e) {
+            trace.push([e.latlng['lat'], e.latlng['lng']]);
+            let myMarker = L.circleMarker(e.latlng, 5).addTo(map);
+            markerList.push(myMarker);
+            if (trace.length > 1) {
+                let myPolyline = L.polyline([trace[trace.length - 2], trace[trace.length - 1]]).addTo(map);
+                polylineList.push(myPolyline);
+            }
+        });
+
+        // 沿点路径移动
+        function move() {
+            if (trace.length > 1) {
+                let nowTrace = [trace.shift(), trace[0]];
+                let marker1 = L.Marker.movingMarker(nowTrace, [aduration]).addTo(map);
+                marker1.start();
+                intervalID = setInterval(() => {
+                    if (trace.length <= 1) {
+                        for (let i = 0; i < markerList.length - 1; i++) {
+                            let temp = markerList[i];
+                            temp.remove();
+                        }
+                        if (markerList.length !== 0)
+                            markerList.shift().remove();
+
+                        marker1.remove();
+                        if (polylineList.length !== 0)
+                            polylineList.shift().remove();
+                        clearInterval(intervalID);
+                    } else {
+                        nowTrace = [trace.shift(), trace[0]];
+                        markerList.shift().remove();
+                        marker1.remove();
+                        polylineList.shift().remove();
+                        marker1 = L.Marker.movingMarker(nowTrace, [aduration]).addTo(map);
+                        marker1.start();
+                    }
+                }, aduration);
+            }
+        }
+
+
+        function clearAll() {
+            trace = [];
+            for (let i = 0; i < markerList.length; i++) {
+                markerList[i].remove();
+            }
+            for (let i = 0; i < polylineList.length; i++) {
+                polylineList[i].remove();
+            }
+            markerList = [];
+            polylineList = [];
+        };
+    </script>
+</body>
+
+</html>
